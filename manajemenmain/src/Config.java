@@ -5,200 +5,189 @@ import java.sql.ResultSet;
 
 public class Config {
 
+  // Konstanta untuk driver JDBC, URL database, username, dan password
   private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
   private static final String DB_URL = "jdbc:mysql://localhost:3306/karyawanlaundry";
   private static final String USER = "root";
   private static final String PASS = "";
 
+  // Variabel koneksi, statement, dan hasil query
   private static Connection connect;
   private static Statement statement;
   private static ResultSet resultData;
 
-  // ini adalah method static connection
-  public static void connection()
-  
-  {
-    // method untuk melakukan koneksi ke database
+  // Method static untuk koneksi ke database
+  public static void connection() {
     try {
-      // registrasi driver yang akan dipakai
+      // Registrasi driver JDBC
       Class.forName(JDBC_DRIVER);
 
-      // buat koneksi ke database
+      // Membuat koneksi ke database
       connect = DriverManager.getConnection(DB_URL, USER, PASS);
 
     } catch (Exception e) {
-      // kalo ada error saat koneksi
-      // maka tampilkan errornya
+      // Menangani kesalahan saat koneksi ke database
       e.printStackTrace();
     }
-
   }
 
-  public static String getAllData()
-  {
-    Config.connection();
+  // Method untuk mendapatkan semua data dari tabel
+  public static String getAllData() {
+    Config.connection(); // Membuka koneksi ke database
 
-    // isi nilai default dari variabel data
+    // Inisialisasi nilai default jika tidak ada data
     String data = "Maaf data tidak ada";
 
     try {
-
-      // buat object statement yang ambil dari koneksi
+      // Membuat object statement untuk eksekusi query
       statement = connect.createStatement();
 
-      
-
-        // Menghitung bonus berdasarkan metode calculateBonus()
-        
-
-      // query select all data from database
+      // Query untuk mengambil semua data dari tabel manajemen
       String query = "SELECT Id, Nama,Posisi,Hari_Kerja,Bonus,Gaji FROM manajemen";
 
-      // eksekusi query-nya
+      // Eksekusi query dan simpan hasilnya di resultData
       resultData = statement.executeQuery(query);
 
-      // set variabel data jadi null
+      // Set variabel data menjadi kosong untuk menyimpan hasil
       data = "";
 
-      // looping pengisian variabel data
+      // Iterasi hasil query dan format data ke string
       while (resultData.next()) {
-            data += String.format("%-5d | %-20s | %-15s | %-15s |Rp %-10s |Rp %-10s%n",
-                    resultData.getInt("Id"),
-                    resultData.getString("Nama"),
-                    resultData.getString("Posisi"),
-                    resultData.getString("Hari_Kerja"),
-                    resultData.getString("Bonus"),
-                    resultData.getString("Gaji"));
-        }
+        data += String.format("%-5d | %-20s | %-15s | %-15s |Rp %-10s |Rp %-10s%n",
+                resultData.getInt("Id"),
+                resultData.getString("Nama"),
+                resultData.getString("Posisi"),
+                resultData.getString("Hari_Kerja"),
+                resultData.getString("Bonus"),
+                resultData.getString("Gaji"));
+      }
 
-      
-      
-      // close statement dan connection
+      // Menutup statement dan koneksi
       statement.close();
       connect.close();
 
-
     } catch (Exception e) {
+      // Menangani kesalahan saat pengambilan data
       e.printStackTrace();
     }
 
-    return data;
-
+    return data; // Mengembalikan data
   }
 
-public static boolean tambahData( String Id, String name, String position, double salary, int day, double bonus, double total)
-  {
-    Config.connection();
+  // Method untuk menambahkan data ke database
+  public static boolean tambahData(String Id, String name, String position, double salary, int day, double bonus, double total) {
+    Config.connection(); // Membuka koneksi ke database
     boolean data = false;
-    try {
 
+    try {
+      // Membuat object statement untuk eksekusi query
       statement = connect.createStatement();
 
+      // Query untuk menambahkan data baru ke tabel manajemen
       String query = "INSERT INTO manajemen VALUES ('" + Id + "', '" + name + "', '" + position + "', '" + day + "', '" + bonus + "' , " + total + ")";
 
-
-      if( !statement.execute(query) ){
-        data = true;
+      // Mengeksekusi query dan mengecek hasilnya
+      if (!statement.execute(query)) {
+        data = true; // Data berhasil ditambahkan
       }
 
-
-      // close statement dan koneksi
+      // Menutup statement dan koneksi
       statement.close();
       connect.close();
-      
+
     } catch (Exception e) {
+      // Menangani kesalahan saat penambahan data
       e.printStackTrace();
     }
 
-    return data;
+    return data; // Mengembalikan status penambahan data
   }
 
-public static boolean deleteData( int id )
-  {
-    connection();
+  // Method untuk menghapus data dari database berdasarkan ID
+  public static boolean deleteData(int id) {
+    connection(); // Membuka koneksi ke database
     boolean data = false;
 
     try {
-      
+      // Membuat object statement untuk eksekusi query
       statement = connect.createStatement();
 
+      // Query untuk menghapus data berdasarkan ID
       String query = "DELETE FROM manajemen WHERE Id = " + id;
-      //# String query = "UPDATE manajemen SET isActive = '0' WHERE Id = " + id;
 
-      if( !statement.execute(query) ){
-        data = true;
+      // Mengeksekusi query dan mengecek hasilnya
+      if (!statement.execute(query)) {
+        data = true; // Data berhasil dihapus
       }
 
     } catch (Exception e) {
+      // Menangani kesalahan saat penghapusan data
       e.printStackTrace();
     }
 
-    return data;
+    return data; // Mengembalikan status penghapusan data
   }
 
-
-
-public static boolean updateData( String Id, String name, String position, double salary, int day, double bonus, double total )
-  {
-
-    Config.connection();
+  // Method untuk mengupdate data di database
+  public static boolean updateData(String Id, String name, String position, double salary, int day, double bonus, double total) {
+    Config.connection(); // Membuka koneksi ke database
     boolean data = false;
 
     try {
-
+      // Membuat object statement untuk eksekusi query
       statement = connect.createStatement();
 
+      // Query untuk mengecek data berdasarkan ID
       String queryCek = "SELECT * FROM manajemen WHERE Id = " + Id;
 
+      // Mengeksekusi query cek dan menyimpan hasilnya
       resultData = statement.executeQuery(queryCek);
-      // siapin variabel untuk menampung data pada fild satu row
-      String namaCek = "",posisiCek="";
+
+      // Variabel untuk menyimpan data sementara
+      String namaCek = "", posisiCek = "";
       double hariCek = 0, hargaCek = 0;
 
-      while( resultData.next() ){
+      // Mengisi variabel sementara dengan data dari database
+      while (resultData.next()) {
         namaCek = resultData.getString("nama");
         hariCek = resultData.getInt("hari_kerja");
         posisiCek = resultData.getString("Posisi");
         hargaCek = resultData.getInt("Gaji");
       }
 
-      // validasi jika yang diisi diconsole kosong
-      if( !name.equalsIgnoreCase("") ){
+      // Validasi input pengguna dan mengganti data jika diperlukan
+      if (!name.equalsIgnoreCase("")) {
         namaCek = name;
       }
-      if( day != 0 ){
+      if (day != 0) {
         hariCek = day;
       }
-      if( salary != 0 ){
+      if (salary != 0) {
         hargaCek = total;
       }
-      if( !position.equalsIgnoreCase("") ){
+      if (!position.equalsIgnoreCase("")) {
         posisiCek = position;
       }
-      
 
-      String queryUpdate = "UPDATE manajemen SET Nama = '" + namaCek + "', Posisi = '" + posisiCek + "', hari_kerja = " + hariCek + ", Gaji = " + hargaCek + " WHERE Id = " + Id ;
+      // Query untuk mengupdate data di database
+      String queryUpdate = "UPDATE manajemen SET Nama = '" + namaCek + "', Posisi = '" + posisiCek + "', hari_kerja = " + hariCek + ", Gaji = " + hargaCek + " WHERE Id = " + Id;
 
-      
-      if( !statement.execute(queryUpdate) ){
-        data = true;
-      }else{
-        data = false;
+      // Mengeksekusi query update dan mengecek hasilnya
+      if (!statement.execute(queryUpdate)) {
+        data = true; // Data berhasil diupdate
+      } else {
+        data = false; // Data gagal diupdate
       }
 
-      // close statement dan close koneksi
+      // Menutup statement dan koneksi
       statement.close();
       connect.close();
-      
+
     } catch (Exception e) {
+      // Menangani kesalahan saat pengupdatean data
       e.printStackTrace();
     }
 
-
-    return data;
+    return data; // Mengembalikan status pengupdatean data
   }
 }
-
-
-
-
